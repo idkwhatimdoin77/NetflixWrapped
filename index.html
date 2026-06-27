@@ -148,12 +148,12 @@
     <div class="u-logo">NETFLIX</div>
     <div class="u-title">Your Year,<br><span>Wrapped.</span></div>
     <div class="u-sub">Upload your <strong style="color:#ccc">CONTENT_INTERACTION</strong> folder from your Netflix data download.</div>
-    <div class="drop-zone" id="drop-zone">
+    <label for="nw-folder-input" class="drop-zone">
       <div class="drop-icon"><i class="ti ti-folder-upload" aria-hidden="true"></i></div>
       <div class="drop-text"><strong>Drop your CONTENT_INTERACTION folder here</strong><br>or click to select it</div>
       <div class="folder-badge"><i class="ti ti-folder" aria-hidden="true" style="font-size:12px"></i> CONTENT_INTERACTION</div>
       <div class="drop-hint">Netflix → Account → Download your personal information<br>→ Extract ZIP → upload the CONTENT_INTERACTION folder<br><br>Needs: <strong style="color:#555">ViewingActivity.csv</strong> + <strong style="color:#555">PlaybackRelatedEvents.csv</strong></div>
-    </div>
+    </label>
     <input type="file" id="nw-folder-input" webkitdirectory multiple accept=".csv">
     <div class="err-box" id="err-box"></div>
     <div class="u-divider">OR</div>
@@ -706,7 +706,6 @@ function handleFiles(files){
 }
 
 const dz=document.getElementById('drop-zone'),fi=document.getElementById('nw-folder-input');
-dz.addEventListener('click',()=>fi.click());
 fi.addEventListener('change',()=>handleFiles(fi.files));
 dz.addEventListener('dragover',e=>{e.preventDefault();dz.classList.add('over');});
 dz.addEventListener('dragleave',()=>dz.classList.remove('over'));
