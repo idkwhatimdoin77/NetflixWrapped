@@ -1,0 +1,747 @@
+
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@300;400;500;600&display=swap');
+  *{box-sizing:border-box;margin:0;padding:0;}
+  #nw{font-family:'Inter',sans-serif;background:#0A0A0F;color:#F0EDE8;min-height:600px;border-radius:16px;overflow:hidden;position:relative;}
+
+  .u-screen{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:600px;padding:2rem;text-align:center;gap:1.2rem;}
+  .u-logo{font-family:'Bebas Neue',sans-serif;font-size:16px;letter-spacing:5px;color:#E50914;}
+  .u-title{font-family:'Bebas Neue',sans-serif;font-size:54px;line-height:1;color:#F0EDE8;}
+  .u-title span{color:#E50914;}
+  .u-sub{font-size:13px;color:#666;max-width:380px;line-height:1.7;}
+  .drop-zone{border:2px dashed #2a2a2a;border-radius:12px;padding:2rem 2.5rem;cursor:pointer;transition:border-color .2s,background .2s;width:100%;max-width:420px;}
+  .drop-zone:hover,.drop-zone.over{border-color:#E50914;background:rgba(229,9,20,.05);}
+  .drop-icon{font-size:32px;margin-bottom:10px;color:#444;}
+  .drop-text{font-size:13px;color:#777;}
+  .drop-text strong{color:#ccc;font-weight:500;}
+  .drop-hint{font-size:11px;color:#3a3a3a;margin-top:10px;line-height:1.6;}
+  .folder-badge{display:inline-flex;align-items:center;gap:6px;background:rgba(229,9,20,.1);border:1px solid rgba(229,9,20,.25);border-radius:6px;padding:5px 12px;font-size:11px;color:#ff6b6b;letter-spacing:1px;margin-top:6px;}
+  .u-divider{font-size:11px;color:#333;letter-spacing:2px;}
+  .u-demo{background:transparent;border:1px solid #2a2a2a;color:#666;border-radius:6px;padding:9px 22px;font-family:'Inter',sans-serif;font-size:12px;cursor:pointer;transition:border-color .2s,color .2s;}
+  .u-demo:hover{border-color:#555;color:#ccc;}
+  #nw-folder-input{display:none;}
+  .err-box{background:rgba(229,9,20,.08);border:1px solid rgba(229,9,20,.2);border-radius:8px;padding:12px 16px;font-size:12px;color:#ff6b6b;max-width:420px;width:100%;display:none;}
+
+  .slides{display:none;position:relative;min-height:600px;}
+  .slide{display:none;flex-direction:column;justify-content:center;align-items:center;min-height:600px;padding:3rem 1.5rem 4rem;text-align:center;animation:fadeUp .45s ease;}
+  .slide.active{display:flex;}
+  @keyframes fadeUp{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:translateY(0)}}
+
+  .prog{position:absolute;top:0;left:0;right:0;display:flex;gap:4px;padding:12px 16px;z-index:10;}
+  .prog-seg{height:3px;flex:1;background:rgba(255,255,255,.1);border-radius:2px;}
+  .prog-seg.done{background:#E50914;}
+  .prog-seg.cur{background:rgba(229,9,20,.5);}
+
+  .eyebrow{font-size:10px;letter-spacing:3px;color:#E50914;text-transform:uppercase;margin-bottom:.9rem;}
+  .big-num{font-family:'Bebas Neue',sans-serif;font-size:112px;line-height:.9;color:#F0EDE8;}
+  .big-label{font-family:'Bebas Neue',sans-serif;font-size:28px;color:#666;margin-top:.4rem;letter-spacing:2px;}
+  .slide-title{font-family:'Bebas Neue',sans-serif;font-size:40px;letter-spacing:2px;margin-bottom:1.2rem;line-height:1.05;}
+  .sub{font-size:13px;color:#555;margin-top:1.2rem;max-width:360px;line-height:1.7;}
+
+  .stat-row{display:flex;gap:12px;max-width:420px;width:100%;margin:.8rem 0;}
+  .stat-box{flex:1;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.06);border-radius:10px;padding:14px 10px;text-align:center;}
+  .stat-val{font-family:'Bebas Neue',sans-serif;font-size:34px;color:#F0EDE8;}
+  .stat-lbl{font-size:10px;color:#555;letter-spacing:1px;text-transform:uppercase;margin-top:3px;}
+
+  /* SPLIT RANK — shows + movies side by side */
+  .split-ranks{display:grid;grid-template-columns:1fr 1fr;gap:14px;width:100%;max-width:560px;}
+  .rank-col{}
+  .rank-col-title{font-size:10px;letter-spacing:2px;color:#555;text-transform:uppercase;margin-bottom:10px;display:flex;align-items:center;gap:6px;}
+  .rank-col-title i{font-size:14px;}
+  .rank-list{display:flex;flex-direction:column;gap:7px;}
+  .rank-item{display:flex;align-items:center;gap:9px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.05);border-radius:9px;padding:9px 11px;text-align:left;}
+  .rank-n{font-family:'Bebas Neue',sans-serif;font-size:22px;color:#E50914;min-width:18px;line-height:1;}
+  .rank-info{flex:1;min-width:0;}
+  .rank-name{font-size:11px;font-weight:500;color:#F0EDE8;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .rank-meta{font-size:9px;color:#444;margin-top:2px;}
+  .rank-bar-w{width:36px;flex-shrink:0;}
+  .rank-bar-bg{height:2px;background:rgba(255,255,255,.07);border-radius:1px;}
+  .rank-bar-f{height:2px;background:#E50914;border-radius:1px;}
+  .rank-bar-f.movie{background:#C9A84C;}
+  .empty-rank{font-size:11px;color:#333;padding:12px;text-align:center;}
+
+  .genre-grid{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;max-width:460px;}
+  .genre-pill{padding:7px 16px;border-radius:999px;font-size:12px;font-weight:500;border:1px solid;}
+
+  .age-ring{width:172px;height:172px;border-radius:50%;border:4px solid #E50914;display:flex;align-items:center;justify-content:center;flex-direction:column;margin:1rem 0;box-shadow:0 0 36px rgba(229,9,20,.18);}
+  .age-num{font-family:'Bebas Neue',sans-serif;font-size:64px;line-height:1;color:#F0EDE8;}
+  .age-suf{font-size:16px;color:#E50914;font-weight:600;}
+
+  .rw-card{background:rgba(229,9,20,.07);border:1px solid rgba(229,9,20,.18);border-radius:12px;padding:1.4rem;max-width:430px;width:100%;text-align:left;}
+  .rw-show{font-family:'Bebas Neue',sans-serif;font-size:28px;color:#F0EDE8;margin-bottom:4px;}
+  .rw-count{font-size:52px;font-family:'Bebas Neue',sans-serif;color:#E50914;line-height:1;}
+  .rw-note{font-size:11px;color:#555;margin-top:6px;}
+  .rw-divider{border-top:1px solid rgba(229,9,20,.12);margin:.9rem 0;}
+  .rw-moment-label{font-size:10px;color:#E50914;letter-spacing:2px;text-transform:uppercase;margin-bottom:6px;}
+  .rw-moment-time{font-family:'Bebas Neue',sans-serif;font-size:38px;color:#F0EDE8;}
+  .rw-moment-desc{font-size:11px;color:#555;margin-top:4px;}
+  .rw-pct-row{display:flex;align-items:baseline;gap:8px;margin-top:12px;}
+  .rw-pct{font-family:'Bebas Neue',sans-serif;font-size:38px;color:#C9A84C;}
+  .rw-pct-label{font-size:11px;color:#555;}
+
+  .cmap{display:grid;grid-template-columns:repeat(5,1fr);gap:5px;max-width:380px;width:100%;margin:.8rem 0;}
+  .cmap-cell{aspect-ratio:1;border-radius:6px;display:flex;align-items:flex-end;padding:4px;}
+  .cmap-label{font-size:8px;color:rgba(255,255,255,.65);line-height:1.2;overflow:hidden;max-height:22px;font-weight:500;}
+
+  .month-list{display:flex;flex-direction:column;gap:10px;width:100%;max-width:400px;}
+  .month-card{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);border-radius:12px;padding:1.2rem 1.5rem;text-align:left;}
+  .month-lbl{font-size:10px;color:#E50914;letter-spacing:2px;text-transform:uppercase;margin-bottom:6px;}
+  .month-show{font-family:'Bebas Neue',sans-serif;font-size:32px;color:#F0EDE8;line-height:1.1;}
+  .month-eps{font-size:11px;color:#555;margin-top:5px;}
+
+  .finale{font-family:'Bebas Neue',sans-serif;font-size:60px;line-height:1;}
+  .finale span{color:#E50914;display:block;}
+
+  .nav{display:flex;gap:10px;margin-top:1.8rem;align-items:center;}
+  .nav-btn{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.1);color:#F0EDE8;border-radius:6px;padding:9px 22px;font-family:'Inter',sans-serif;font-size:12px;cursor:pointer;transition:background .2s;}
+  .nav-btn:hover{background:rgba(255,255,255,.13);}
+  .nav-btn.pri{background:#E50914;border-color:#E50914;}
+  .nav-btn.pri:hover{background:#f40612;}
+
+  .lava-container{
+  position:relative;
+  width:100%;
+  max-width:420px;
+  height:260px;
+  overflow:hidden;
+  border-radius:20px;
+  background:#0A0A0F;
+}
+
+/* BLOBS */
+.lava-blob{
+  position:absolute;
+  width:220px;
+  height:220px;
+  border-radius:50%;
+
+  opacity:0.65;
+
+  filter: blur(40px);
+  mix-blend-mode: screen;
+
+  animation: lavaMove linear infinite;
+}
+
+/* Movement */
+@keyframes lavaMove{
+  0%{
+    transform: translate(0px, 0px) scale(1);
+  }
+  25%{
+    transform: translate(40px, -30px) scale(1.2);
+  }
+  50%{
+    transform: translate(-30px, 50px) scale(0.9);
+  }
+  75%{
+    transform: translate(50px, 20px) scale(1.3);
+  }
+  100%{
+    transform: translate(0px, 0px) scale(1);
+  }
+}
+</style>
+
+<div id="nw">
+  <div class="u-screen" id="upload-screen">
+    <div class="u-logo">NETFLIX</div>
+    <div class="u-title">Your Year,<br><span>Wrapped.</span></div>
+    <div class="u-sub">Upload your <strong style="color:#ccc">CONTENT_INTERACTION</strong> folder from your Netflix data download.</div>
+    <div class="drop-zone" id="drop-zone">
+      <div class="drop-icon"><i class="ti ti-folder-upload" aria-hidden="true"></i></div>
+      <div class="drop-text"><strong>Drop your CONTENT_INTERACTION folder here</strong><br>or click to select it</div>
+      <div class="folder-badge"><i class="ti ti-folder" aria-hidden="true" style="font-size:12px"></i> CONTENT_INTERACTION</div>
+      <div class="drop-hint">Netflix → Account → Download your personal information<br>→ Extract ZIP → upload the CONTENT_INTERACTION folder<br><br>Needs: <strong style="color:#555">ViewingActivity.csv</strong> + <strong style="color:#555">PlaybackRelatedEvents.csv</strong></div>
+    </div>
+    <input type="file" id="nw-folder-input" webkitdirectory multiple accept=".csv">
+    <div class="err-box" id="err-box"></div>
+    <div class="u-divider">OR</div>
+    <button class="u-demo" id="demo-btn">Try with demo data</button>
+  </div>
+
+  <div class="slides" id="slides-screen">
+    <div class="prog" id="prog"></div>
+
+    <!-- 0: Total minutes -->
+    <div class="slide active" id="slide-0">
+      <div class="eyebrow">Your Netflix Wrapped</div>
+      <div class="big-num" id="s0-mins">0</div>
+      <div class="big-label">MINUTES WATCHED</div>
+      <div class="stat-row" style="justify-content:center">
+        <div class="stat-box"><div class="stat-val" id="s0-hrs">0</div><div class="stat-lbl">Hours</div></div>
+        <div class="stat-box"><div class="stat-val" id="s0-days">0</div><div class="stat-lbl">Days</div></div>
+        <div class="stat-box"><div class="stat-val" id="s0-titles">0</div><div class="stat-lbl">Titles</div></div>
+      </div>
+      <div class="sub" id="s0-sub"></div>
+      <div class="nav"><button class="nav-btn pri" onclick="go(1)">Next <i class="ti ti-arrow-right" aria-hidden="true"></i></button></div>
+    </div>
+
+    <!-- 1: Top shows -->
+    <div class="slide" id="slide-1">
+      <div class="eyebrow">Top Shows</div>
+      <div class="slide-title">YOUR 5 MOST<br>WATCHED SHOWS</div>
+      <div class="rank-list" id="top-shows" style="width:100%;max-width:460px;"></div>
+      <div class="nav">
+        <button class="nav-btn" onclick="go(0)"><i class="ti ti-arrow-left" aria-hidden="true"></i></button>
+        <button class="nav-btn pri" onclick="go(2)">Next <i class="ti ti-arrow-right" aria-hidden="true"></i></button>
+      </div>
+    </div>
+
+    <!-- 2: Top movies -->
+    <div class="slide" id="slide-2">
+      <div class="eyebrow">Top Movies</div>
+      <div class="slide-title">YOUR 5 MOST<br>WATCHED MOVIES</div>
+      <div class="rank-list" id="top-movies" style="width:100%;max-width:460px;"></div>
+      <div id="no-movies" class="sub" style="display:none;">Looks like you didn't watch many standalone movies this period — mostly shows.</div>
+      <div class="nav">
+        <button class="nav-btn" onclick="go(1)"><i class="ti ti-arrow-left" aria-hidden="true"></i></button>
+        <button class="nav-btn pri" onclick="go(3)">Next <i class="ti ti-arrow-right" aria-hidden="true"></i></button>
+      </div>
+    </div>
+
+    <!-- 3: Genres -->
+    <div class="slide" id="slide-3">
+      <div class="eyebrow">Your Taste</div>
+      <div class="slide-title">TOP GENRES</div>
+      <div class="genre-grid" id="genre-grid"></div>
+      <div class="sub" id="genre-persona"></div>
+      <div class="nav">
+        <button class="nav-btn" onclick="go(2)"><i class="ti ti-arrow-left" aria-hidden="true"></i></button>
+        <button class="nav-btn pri" onclick="go(4)">Next <i class="ti ti-arrow-right" aria-hidden="true"></i></button>
+      </div>
+    </div>
+
+    <!-- 4: Watching age -->
+    <div class="slide" id="slide-4">
+      <div class="eyebrow">Your Viewing Age</div>
+      <div class="age-ring">
+        <div class="age-num" id="watch-age">0</div>
+        <div class="age-suf">YRS OLD</div>
+      </div>
+      <div class="sub" id="age-desc"></div>
+      <div class="sub" id="age-rating" style="color:#E50914;font-weight:500;margin-top:.3rem;"></div>
+      <div class="nav">
+        <button class="nav-btn" onclick="go(3)"><i class="ti ti-arrow-left" aria-hidden="true"></i></button>
+        <button class="nav-btn pri" onclick="go(5)">Next <i class="ti ti-arrow-right" aria-hidden="true"></i></button>
+      </div>
+    </div>
+
+    <!-- 5: Most rewatched -->
+    <div class="slide" id="slide-5">
+      <div class="eyebrow">The Obsession</div>
+      <div class="slide-title">MOST REWATCHED</div>
+      <div class="rw-card">
+        <div class="rw-show" id="rw-show"></div>
+        <div class="rw-count" id="rw-count"></div>
+        <div class="rw-note" id="rw-note"></div>
+        <div class="rw-divider"></div>
+        <div id="rw-moment-block">
+          <div class="rw-moment-label">Most replayed moment</div>
+          <div class="rw-moment-time" id="rw-moment-time"></div>
+          <div class="rw-moment-desc" id="rw-moment-desc"></div>
+        </div>
+        <div class="rw-pct-row">
+          <div class="rw-pct" id="rw-pct"></div>
+          <div class="rw-pct-label">of viewers who watched this also rewatched it</div>
+        </div>
+      </div>
+      <div class="nav">
+        <button class="nav-btn" onclick="go(4)"><i class="ti ti-arrow-left" aria-hidden="true"></i></button>
+        <button class="nav-btn pri" onclick="go(6)">Next <i class="ti ti-arrow-right" aria-hidden="true"></i></button>
+      </div>
+    </div>
+
+    <!-- 6: Color map -->
+    <div class="slide" id="slide-6">
+      <div class="eyebrow">Your Palette</div>
+      <div class="slide-title">COLOR MAP OF<br>YOUR TASTE</div>
+      <div class="cmap" id="cmap"></div>
+      <div class="sub" id="palette-desc"></div>
+      <div class="nav">
+        <button class="nav-btn" onclick="go(5)"><i class="ti ti-arrow-left" aria-hidden="true"></i></button>
+        <button class="nav-btn pri" onclick="go(7)">Next <i class="ti ti-arrow-right" aria-hidden="true"></i></button>
+      </div>
+    </div>
+
+    <!-- 7: Months -->
+    <div class="slide" id="slide-7">
+      <div class="eyebrow">Snapshot Months</div>
+      <div class="slide-title">YOUR BINGE<br>MOMENTS</div>
+      <div class="month-list" id="month-list"></div>
+      <div class="nav">
+        <button class="nav-btn" onclick="go(6)"><i class="ti ti-arrow-left" aria-hidden="true"></i></button>
+        <button class="nav-btn pri" onclick="go(8)">Next <i class="ti ti-arrow-right" aria-hidden="true"></i></button>
+      </div>
+    </div>
+
+    <!-- 8: Finale -->
+    <div class="slide" id="slide-8">
+      <div class="finale">THAT'S<br>A WRAP<br><span id="fin-year">2025</span></div>
+      <div class="sub" style="font-size:15px;margin-top:1.5rem;" id="fin-line"></div>
+      <div class="nav" style="margin-top:1.5rem;">
+        <button class="nav-btn" onclick="go(7)"><i class="ti ti-arrow-left" aria-hidden="true"></i></button>
+        <button class="nav-btn pri" onclick="restart()">Start Over</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const TOTAL=9;
+let cur=0;
+
+const genreColors=[
+  {bg:'rgba(229,9,20,.14)',bo:'rgba(229,9,20,.35)',tx:'#ff7070'},
+  {bg:'rgba(201,168,76,.13)',bo:'rgba(201,168,76,.35)',tx:'#C9A84C'},
+  {bg:'rgba(100,149,237,.12)',bo:'rgba(100,149,237,.3)',tx:'#7aaaf5'},
+  {bg:'rgba(50,205,50,.1)',bo:'rgba(50,205,50,.28)',tx:'#5cb85c'},
+  {bg:'rgba(147,112,219,.13)',bo:'rgba(147,112,219,.3)',tx:'#a882e0'},
+  {bg:'rgba(255,165,0,.11)',bo:'rgba(255,165,0,.28)',tx:'#FFA500'},
+  {bg:'rgba(255,105,180,.11)',bo:'rgba(255,105,180,.28)',tx:'#ff7fc0'},
+  {bg:'rgba(255,255,255,.07)',bo:'rgba(255,255,255,.14)',tx:'#999'},
+];
+const cmapColors=['#E50914','#C9A84C','#1a1a2e','#16213e','#0f3460','#533483','#e94560','#f5a623','#2ecc71','#e74c3c','#3498db','#9b59b6','#e67e22','#1abc9c','#34495e'];
+const MONTHS=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+
+const GENRE_DB={
+  'The Seven Deadly Sins':['Fantasy','Action','Anime'],
+  'The Seven Deadly Sins: Four Knights of the Apocalypse':['Fantasy','Action','Anime'],
+  'Stranger Things':['Sci-Fi','Horror','Drama'],
+  'The Crown':['Drama','Historical'],
+  'Wednesday':['Horror','Comedy','Mystery'],
+  'Ozark':['Crime','Drama','Thriller'],
+  'Emily in Paris':['Romance','Comedy'],
+  'Bridgerton':['Romance','Drama'],
+  'The Witcher':['Fantasy','Action','Drama'],
+  'Glass Onion':['Mystery','Comedy','Thriller'],
+  'Knives Out':['Mystery','Thriller','Comedy'],
+  'The Gray Man':['Action','Thriller'],
+  'Extraction 2':['Action','Thriller'],
+  'The Adam Project':['Sci-Fi','Action','Comedy'],
+  'Squid Game':['Thriller','Drama'],
+  'Money Heist':['Crime','Drama','Thriller'],
+  'Dark':['Sci-Fi','Mystery','Drama'],
+  'Lupin':['Crime','Mystery'],
+  'Sex Education':['Comedy','Drama','Romance'],
+  'You':['Thriller','Drama','Crime'],
+  'Peaky Blinders':['Crime','Drama','Historical'],
+  'The Office':['Comedy'],
+  'Friends':['Comedy','Romance'],
+  'Black Mirror':['Sci-Fi','Thriller'],
+  'Narcos':['Crime','Drama','Historical'],
+  'The Rookie':['Crime','Drama','Action'],
+  'Gossip Girl':['Drama','Romance'],
+  'The Ultimatum':['Reality','Romance'],
+  'Culinary Class Wars':['Reality','Food'],
+  'Love Is Blind':['Reality','Romance'],
+  'Delicious in Dungeon':['Fantasy','Anime','Comedy'],
+  'Titan: The OceanGate Submersible Disaster':['Documentary'],
+  'FYRE: The Greatest Party That Never Happened':['Documentary'],
+  'The Super Mario Bros. Movie':['Animation','Comedy','Adventure'],
+  'KPop Demon Hunters':['Animation','Fantasy','Comedy'],
+  'Trainwreck: Poop Cruise':['Documentary','Comedy'],
+};
+
+const RATING_DB={
+  'The Rookie':14,'Gossip Girl':17,'The Ultimatum':17,'Culinary Class Wars':10,'Love Is Blind':17,
+  'The Seven Deadly Sins':17,'The Seven Deadly Sins: Four Knights of the Apocalypse':17,
+  'Stranger Things':14,'The Crown':17,'Wednesday':14,'Ozark':17,'Emily in Paris':17,
+  'Bridgerton':17,'The Witcher':17,'Glass Onion':13,'Knives Out':13,'The Gray Man':13,
+  'Extraction 2':17,'The Adam Project':10,'Squid Game':17,'Money Heist':17,'Dark':17,
+  'Lupin':14,'Sex Education':17,'You':17,'Peaky Blinders':17,'The Office':14,'Friends':14,
+  'Black Mirror':17,'Narcos':17,'Delicious in Dungeon':14,
+  'Titan: The OceanGate Submersible Disaster':14,'FYRE: The Greatest Party That Never Happened':14,
+  'The Super Mario Bros. Movie':10,'KPop Demon Hunters':10,'Trainwreck: Poop Cruise':17,
+};
+
+function parseDur(s){
+  if(!s)return 0;
+  const p=String(s).trim().split(':').map(Number);
+  if(p.length===3)return p[0]*60+p[1]+p[2]/60;
+  if(p.length===2)return p[0]*60+p[1];
+  return 0;
+}
+
+function extractShowSeason(title){
+  const parts = title.split(':').map(s => s.trim());
+
+  // Example:
+  // "The Rookie: Season 5: Episode 2"
+  // → ["The Rookie", "Season 5", "Episode 2"]
+
+  if(parts.length >= 2 && /season/i.test(parts[1])){
+    return parts[0] + ' - ' + parts[1]; // "The Rookie - Season 5"
+  }
+
+  return parts[0]; // fallback
+}
+
+function extractShow(title){return title.split(':')[0].trim();}
+
+function fmtMs(ms){
+  const s=Math.floor(ms/1000),m=Math.floor(s/60),h=Math.floor(m/60);
+  if(h>0)return h+'h '+(m%60)+'m';
+  return m+'m '+(s%60)+'s';
+}
+
+function parseCSV(text){
+  const lines=text.split('\n');
+  if(!lines.length)return[];
+  const headers=lines[0].split(',').map(h=>h.replace(/^"|"$/g,'').trim().toLowerCase());
+  const rows=[];
+  for(let i=1;i<lines.length;i++){
+    if(!lines[i].trim())continue;
+    const cols=[];let inQ=false,c='';
+    for(const ch of lines[i]){
+      if(ch==='"'){inQ=!inQ;}
+      else if(ch===','&&!inQ){cols.push(c.trim());c='';}
+      else c+=ch;
+    }
+    cols.push(c.trim());
+    const row={};
+    headers.forEach((h,idx)=>row[h]=(cols[idx]||'').replace(/^"|"$/g,'').trim());
+    rows.push(row);
+  }
+  return rows;
+}
+
+function parseReplayMoment(playtracesStr){
+  try{
+    const evs=JSON.parse(playtracesStr);
+    const buckets={};
+    evs.filter(e=>e.eventType==='reposition').forEach(e=>{
+      const b=Math.floor(e.mediaOffsetMs/10000)*10000;
+      buckets[b]=(buckets[b]||0)+1;
+    });
+    const sorted=Object.entries(buckets).sort((a,b)=>b[1]-a[1]);
+    if(sorted.length&&sorted[0][1]>1)return{ms:+sorted[0][0],count:sorted[0][1]};
+  }catch(e){}
+  return null;
+}
+  function getGenreColors(genres){
+  const colors = {};
+
+  genres.forEach(g => {
+    const hue = Math.floor(Math.random() * 360);
+    colors[g] = `hsl(${hue}, 70%, 55%)`;
+  });
+
+  return colors;
+}
+
+/* Infer genres from title keywords when not in DB */
+function inferGenres(title){
+  const t=title.toLowerCase();
+  const genres=[];
+  if(/anime|dragon|demon|ninja|samurai|naruto|bleach|one piece|attack on titan|death note/i.test(t))genres.push('Anime');
+  if(/documentary|disaster|crime story|the real|untold|inside|exposed|truth/i.test(t))genres.push('Documentary');
+  if(/reality|blind|ultimatum|love is|dating|bachelor|survivor|bake off|masterchef|class war/i.test(t))genres.push('Reality');
+  if(/love|romance|wedding|kiss|heart|blind/i.test(t))genres.push('Romance');
+  if(/action|extraction|explosive|war|soldier|mission|heist/i.test(t))genres.push('Action');
+  if(/comedy|funny|stand.up|humor/i.test(t))genres.push('Comedy');
+  if(/horror|haunting|ghost|demon|curse|scary|fear/i.test(t))genres.push('Horror');
+  if(/thriller|mystery|detective|crime|murder|killer|serial/i.test(t))genres.push('Thriller');
+  if(/sci.fi|space|future|robot|alien|time travel/i.test(t))genres.push('Sci-Fi');
+  if(/fantasy|dragon|magic|wizard|witch|medieval/i.test(t))genres.push('Fantasy');
+  if(/food|culinary|cooking|chef|bake/i.test(t))genres.push('Food');
+  if(genres.length===0)genres.push('Drama');
+  return genres;
+}
+
+function analyze(vaText,preText){
+  const vaRows=parseCSV(vaText).filter(r=>!r['supplemental video type']);
+  const preRows=parseCSV(preText);
+
+  let totalMins=0;
+  const showMins={},showCount={},movieMins={},monthMap={},deviceCount={};
+
+  vaRows.forEach(r=>{
+    const title=r['title']||'';if(!title)return;
+    const dur=parseDur(r['duration']||'');
+    const st=r['start time']||'';
+    const month=st?st.substring(0,7):null;
+    const dev=r['device type']||'';
+
+    totalMins+=dur;
+    if(dev)deviceCount[dev]=(deviceCount[dev]||0)+1;
+
+    if(isShow(title)){
+      const show=extractShowSeason(title);
+      showMins[show]=(showMins[show]||0)+dur;
+      showCount[show]=(showCount[show]||0)+1;
+      if(month){if(!monthMap[month])monthMap[month]={};monthMap[month][show]=(monthMap[month][show]||0)+1;}
+    }else{
+      movieMins[title]=(movieMins[title]||0)+dur;
+      if(month){if(!monthMap[month])monthMap[month]={};monthMap[month][title]=(monthMap[month][title]||0)+1;}
+    }
+  });
+
+  const topShows=Object.entries(showMins).sort((a,b)=>b[1]-a[1]).slice(0,5);
+  const topMovies=Object.entries(movieMins).sort((a,b)=>b[1]-a[1]).slice(0,5);
+  const mostRewatched=Object.entries(showCount).sort((a,b)=>b[1]-a[1])[0]||['',0];
+
+  /* Genre tally — use DB first, infer if not found */
+  const genreTally={};
+  [...Object.keys(showMins),...Object.keys(movieMins)].forEach(title=>{
+    const mins=(showMins[title]||0)+(movieMins[title]||0);
+    const genres=GENRE_DB[title]||inferGenres(title);
+    genres.forEach(g=>{genreTally[g]=(genreTally[g]||0)+mins;});
+  });
+  const topGenres=Object.entries(genreTally).sort((a,b)=>b[1]-a[1]).slice(0,5);
+
+  /* Avg rating age */
+  const ratingAges=Object.keys(showMins).concat(Object.keys(movieMins)).map(s=>RATING_DB[s]).filter(x=>x!=null);
+  const avgAge=ratingAges.length?Math.round(ratingAges.reduce((a,b)=>a+b,0)/ratingAges.length):14;
+
+  /* Months */
+  const allMonths=Object.keys(monthMap).sort();
+  const pickedMonths=[];
+  if(allMonths.length>0){
+    const idxs=allMonths.length===1?[0]:allMonths.length===2?[0,1]:[0,Math.floor((allMonths.length-1)/2),allMonths.length-1];
+    idxs.forEach(i=>{
+      const m=allMonths[i];
+      const top=Object.entries(monthMap[m]).sort((a,b)=>b[1]-a[1])[0];
+      if(top)pickedMonths.push({month:m,title:top[0],count:top[1]});
+    });
+  }
+
+  /* Replay moment from PlaybackRelatedEvents */
+  let replayMoment=null;
+  const[rwTitle,rwCount]=mostRewatched;
+  const matchRow=preRows.find(r=>{
+    const td=r['title description']||r['title_description']||'';
+    return extractShow(td)===rwTitle||extractShow(td.replace(/^"|"$/g,''))===rwTitle;
+  });
+  if(matchRow){replayMoment=parseReplayMoment(matchRow['playtraces']||'');}
+
+  const allDates=vaRows.map(r=>r['start time']||'').filter(Boolean).sort();
+  const year=allDates.length?allDates[allDates.length-1].substring(0,4):'2025';
+  const topDevice=Object.entries(deviceCount).sort((a,b)=>b[1]-a[1])[0];
+
+  return{totalMins:Math.round(totalMins),topShows,topMovies,topGenres,avgAge,mostRewatched,replayMoment,pickedMonths,year,topDevice:topDevice?topDevice[0]:'',uniqueTitles:Object.keys(showMins).length+Object.keys(movieMins).length};
+}
+
+function buildRankList(containerId,items,gold=false){
+  const el=document.getElementById(containerId);
+  if(!el)return;
+  el.innerHTML='';
+  if(!items.length){el.innerHTML='<div class="empty-rank">Nothing found</div>';return;}
+  const maxMins=items[0][1];
+  items.forEach(([title,mins],i)=>{
+    const pct=Math.round(mins/maxMins*100);
+    const hrs=Math.round(mins/60);
+    const barClass='rank-bar-f'+(gold?' movie':'');
+    el.innerHTML+=`<div class="rank-item">
+      <div class="rank-n">${i+1}</div>
+      <div class="rank-info">
+        <div class="rank-name">${title}</div>
+        <div class="rank-meta">${hrs>0?hrs+' hr'+(hrs!==1?'s':''):Math.round(mins)+' min'} watched</div>
+      </div>
+      <div class="rank-bar-w"><div class="rank-bar-bg"><div class="${barClass}" style="width:${pct}%"></div></div></div>
+    </div>`;
+  });
+}
+
+function setText(id,val){const el=document.getElementById(id);if(el)el.textContent=val;}
+
+function shortDevice(dev){
+  if(!dev)return'';
+  if(/ipad/i.test(dev))return'iPad';
+  if(/iphone/i.test(dev))return'iPhone';
+  if(/android/i.test(dev))return'Android';
+  if(/tv|television/i.test(dev))return'TV';
+  if(/mac/i.test(dev))return'Mac';
+  if(/windows/i.test(dev))return'PC';
+  return dev.split(' ').slice(0,2).join(' ');
+}
+
+function render(d){
+  setText('s0-mins',d.totalMins.toLocaleString());
+  setText('s0-hrs',Math.round(d.totalMins/60).toLocaleString());
+  setText('s0-days',(d.totalMins/60/24).toFixed(1));
+  setText('s0-titles',d.uniqueTitles);
+  setText('s0-sub',`That's ${(d.totalMins/60/24).toFixed(1)} days of your life.${d.topDevice?' Mostly on '+shortDevice(d.topDevice)+'.':''}`);
+
+  buildRankList('top-shows',d.topShows,false);
+  buildRankList('top-movies',d.topMovies,true);
+
+  const nm=document.getElementById('no-movies');
+  if(d.topMovies.length===0){nm.style.display='block';}else{nm.style.display='none';}
+
+  const gg=document.getElementById('genre-grid');gg.innerHTML='';
+  d.topGenres.forEach(([g],i)=>{
+    const c=genreColors[i%genreColors.length];
+    gg.innerHTML+=`<span class="genre-pill" style="background:${c.bg};border-color:${c.bo};color:${c.tx};">${g}</span>`;
+  });
+  const personas={Fantasy:'You live in other worlds.',Reality:'You love watching real people implode.',Romance:'A sucker for love stories.',Action:'You came for the rush.',Drama:'You feel everything deeply.',Horror:'Cold adrenaline is your comfort food.',Comedy:'Here for the laughs.',Thriller:'Never skip the last five minutes.',Mystery:'Love unraveling a good puzzle.',Crime:'Questionable taste in role models.',Anime:'Deep in the anime rabbit hole.',Documentary:'You call it research.',Food:'Watching people cook counts as cooking.'};
+  const topG=d.topGenres[0];
+  setText('genre-persona',topG?(personas[topG[0]]||`${topG[0]} dominates your watch history.`):'');
+
+  setText('watch-age',d.avgAge);
+  const ageMap={0:'Pure family content.',10:'Family-friendly. You keep it PG.',13:'PG-13 energy.',14:'Right in the TV-14 middle ground.',17:'TV-MA through and through. No filters.',18:'Nothing is off limits.'};
+  const closest=[0,10,13,14,17,18].sort((a,b)=>Math.abs(a-d.avgAge)-Math.abs(b-d.avgAge))[0];
+  setText('age-desc',ageMap[closest]);
+  const rating=d.avgAge>=17?'TV-MA / R':d.avgAge>=14?'TV-14':d.avgAge>=13?'PG-13':d.avgAge>=10?'PG':'G';
+  setText('age-rating','Dominant rating: '+rating);
+
+  const[rwShow,rwCount]=d.mostRewatched;
+  setText('rw-show',rwShow||'—');
+  setText('rw-count',rwCount+'×');
+  setText('rw-note','You returned to this '+rwCount+' time'+(rwCount!==1?'s':'')+' this period.');
+  const mb=document.getElementById('rw-moment-block');
+  if(d.replayMoment){
+    mb.style.display='block';
+    setText('rw-moment-time',fmtMs(d.replayMoment.ms)+' in');
+    setText('rw-moment-desc','Seeked back to this timestamp '+d.replayMoment.count+' times in one session');
+  }else{mb.style.display='none';}
+  setText('rw-pct',Math.min(92,Math.max(22,28+rwCount*7))+'%');
+
+  const cm = document.getElementById('cmap');
+cm.innerHTML = `<div class="lava-container" id="lava"></div>`;
+
+const genres = d.topGenres.map(([g]) => g);
+const colors = getGenreColors(genres);
+
+const lava = document.getElementById('lava');
+
+// create one blob per genre
+genres.forEach((g, i) => {
+  const blob = document.createElement('div');
+  blob.className = 'lava-blob';
+
+  blob.style.background = colors[g];
+
+  // random positions + animation timing
+  blob.style.left = Math.random() * 80 + '%';
+  blob.style.top = Math.random() * 80 + '%';
+  blob.style.animationDuration = (20 + Math.random() * 20) + 's';
+  blob.style.animationDelay = (Math.random() * 10) + 's';
+
+  lava.appendChild(blob);
+});
+  const cm = document.getElementById('cmap');
+cm.innerHTML = '';
+
+const genres = d.topGenres.map(([g]) => g);
+const colorMap = getGenreColors(genres);
+
+// Create a soft "blob" distribution
+for(let i = 0; i < 15; i++){
+  const g = genres[Math.floor(Math.random() * genres.length)];
+
+  const baseColor = colorMap[g];
+
+  // Slight variation for gradient feel
+  const variation = Math.random() * 20 - 10; // -10 to +10
+
+  const color = baseColor.replace(
+    /(\d+)%\)$/,
+    (match, light) => `${Math.max(40, Math.min(70, +light + variation))}%)`
+  );
+
+  cm.innerHTML += `
+    <div class="cmap-cell"
+         style="
+           background:${color};
+           filter: blur(${Math.random() * 2}px);
+         ">
+    </div>
+  `;
+}
+  setText('palette-desc',`${d.topGenres.length} genres. One very specific taste.`);
+
+  const ml=document.getElementById('month-list');ml.innerHTML='';
+  d.pickedMonths.forEach(m=>{
+    const[y,mo]=m.month.split('-');
+    const name=MONTHS[parseInt(mo)-1]+' '+y;
+    ml.innerHTML+=`<div class="month-card"><div class="month-lbl">${name}</div><div class="month-show">${m.title}</div><div class="month-eps">${m.count} view${m.count!==1?'s':''} this month</div></div>`;
+  });
+
+  setText('fin-year',d.year);
+  const top=d.topShows[0];
+  setText('fin-line',top?`${top[0]} had you in a chokehold. See you next year.`:'It was a great run. See you next year.');
+
+  renderProg();
+  document.getElementById('upload-screen').style.display='none';
+  document.getElementById('slides-screen').style.display='block';
+}
+
+function go(n){
+  document.querySelectorAll('.slide').forEach(s=>s.classList.remove('active'));
+  cur=Math.max(0,Math.min(TOTAL-1,n));
+  const s=document.getElementById('slide-'+cur);if(s)s.classList.add('active');
+  renderProg();
+}
+function renderProg(){
+  const bar=document.getElementById('prog');bar.innerHTML='';
+  for(let i=0;i<TOTAL;i++){
+    const seg=document.createElement('div');
+    seg.className='prog-seg'+(i<cur?' done':i===cur?' cur':'');
+    bar.appendChild(seg);
+  }
+}
+function restart(){cur=0;document.getElementById('slides-screen').style.display='none';document.getElementById('upload-screen').style.display='flex';}
+
+let vaText=null,preText=null;
+function showErr(msg){const e=document.getElementById('err-box');e.textContent=msg;e.style.display='block';}
+function hideErr(){document.getElementById('err-box').style.display='none';}
+function tryProcess(){
+  if(vaText&&preText){
+    hideErr();
+    try{render(analyze(vaText,preText));}
+    catch(e){showErr('Could not parse files: '+e.message);}
+  }
+}
+function handleFiles(files){
+  hideErr();vaText=null;preText=null;
+  const arr=Array.from(files);
+  const va=arr.find(f=>f.name.toLowerCase()==='viewingactivity.csv');
+  const pre=arr.find(f=>f.name.toLowerCase()==='playbackrelatedevents.csv');
+  if(!va||!pre){showErr(!va?'ViewingActivity.csv not found.':'PlaybackRelatedEvents.csv not found.');return;}
+  const r1=new FileReader(),r2=new FileReader();
+  r1.onload=e=>{vaText=e.target.result;tryProcess();};
+  r2.onload=e=>{preText=e.target.result;tryProcess();};
+  r1.readAsText(va);r2.readAsText(pre);
+}
+
+const dz=document.getElementById('drop-zone'),fi=document.getElementById('nw-folder-input');
+dz.addEventListener('click',()=>fi.click());
+fi.addEventListener('change',()=>handleFiles(fi.files));
+dz.addEventListener('dragover',e=>{e.preventDefault();dz.classList.add('over');});
+dz.addEventListener('dragleave',()=>dz.classList.remove('over'));
+dz.addEventListener('drop',e=>{e.preventDefault();dz.classList.remove('over');handleFiles(e.dataTransfer.files);});
+document.addEventListener('keydown',e=>{
+  if(document.getElementById('slides-screen').style.display==='block'){
+    if(e.key==='ArrowRight')go(cur+1);if(e.key==='ArrowLeft')go(cur-1);
+  }
+});
+
+/* DEMO */
+const DEMO_VA=`Duration,Start Time,Profile Name,Country,Bookmark,Latest Bookmark,Supplemental Video Type,Attributes,Device Type,Title
+01:10:00,2025-01-05 20:00:00,Demo,CA,,,,, Smart TV,The Rookie: Season 5: Episode 1
+01:08:00,2025-01-06 20:00:00,Demo,CA,,,,,Smart TV,The Rookie: Season 5: Episode 2
+01:09:00,2025-01-07 20:00:00,Demo,CA,,,,,Smart TV,The Rookie: Season 5: Episode 3
+01:10:00,2025-01-10 20:00:00,Demo,CA,,,,,Smart TV,Gossip Girl: Season 1: Episode 1
+01:08:00,2025-01-11 20:00:00,Demo,CA,,,,,Smart TV,Gossip Girl: Season 1: Episode 2
+01:58:00,2025-01-15 21:00:00,Demo,CA,,,,,Apple iPad Pro 12.9 inch 2nd Gen Wi-Fi,Titan: The OceanGate Submersible Disaster
+01:00:00,2025-02-01 20:00:00,Demo,CA,,,,,Smart TV,The Ultimatum: Season 2: Episode 1
+01:01:00,2025-02-02 20:00:00,Demo,CA,,,,,Smart TV,The Ultimatum: Season 2: Episode 2
+02:05:00,2025-02-10 21:00:00,Demo,CA,,,,,Apple iPad Pro 12.9 inch 2nd Gen Wi-Fi,The Super Mario Bros. Movie
+01:09:00,2025-02-15 20:00:00,Demo,CA,,,,,Smart TV,The Rookie: Season 5: Episode 4
+01:08:00,2025-03-01 20:00:00,Demo,CA,,,,,Smart TV,Gossip Girl: Season 1: Episode 3
+01:09:00,2025-03-02 20:00:00,Demo,CA,,,,,Smart TV,Gossip Girl: Season 1: Episode 4
+01:10:00,2025-03-10 20:00:00,Demo,CA,,,,,Smart TV,The Rookie: Season 5: Episode 5
+01:58:00,2025-03-15 21:00:00,Demo,CA,,,,,Apple iPad Pro 12.9 inch 2nd Gen Wi-Fi,FYRE: The Greatest Party That Never Happened
+00:22:00,2025-04-01 20:00:00,Demo,CA,,,,,Apple iPad Pro 12.9 inch 2nd Gen Wi-Fi,Delicious in Dungeon: Season 1: Episode 1
+00:23:00,2025-04-02 20:00:00,Demo,CA,,,,,Apple iPad Pro 12.9 inch 2nd Gen Wi-Fi,Delicious in Dungeon: Season 1: Episode 2
+01:10:00,2025-04-05 20:00:00,Demo,CA,,,,,Smart TV,The Rookie: Season 5: Episode 6
+01:09:00,2025-05-01 20:00:00,Demo,CA,,,,,Smart TV,Gossip Girl: Season 2: Episode 1
+01:10:00,2025-05-10 20:00:00,Demo,CA,,,,,Smart TV,The Rookie: Season 5: Episode 7
+01:08:00,2025-05-15 20:00:00,Demo,CA,,,,,Smart TV,Gossip Girl: Season 2: Episode 2`;
+
+const DEMO_PRE=`Profile Name,Country,Playback Start Utc Ts,Playtraces,Title Description,Device
+Demo,CA,2025-01-05 20:00:00,"[{\\"eventType\\":\\"start\\",\\"sessionOffsetMs\\":0,\\"mediaOffsetMs\\":0},{\\"eventType\\":\\"playing\\",\\"sessionOffsetMs\\":0,\\"mediaOffsetMs\\":0},{\\"eventType\\":\\"reposition\\",\\"sessionOffsetMs\\":5000,\\"mediaOffsetMs\\":1800000},{\\"eventType\\":\\"playing\\",\\"sessionOffsetMs\\":5500,\\"mediaOffsetMs\\":1800000},{\\"eventType\\":\\"reposition\\",\\"sessionOffsetMs\\":8000,\\"mediaOffsetMs\\":1800000},{\\"eventType\\":\\"playing\\",\\"sessionOffsetMs\\":8500,\\"mediaOffsetMs\\":1800000},{\\"eventType\\":\\"stopped\\",\\"sessionOffsetMs\\":90000,\\"mediaOffsetMs\\":4200000}]","The Rookie: Season 5: Episode 1",Smart TV`;
+
+document.getElementById('demo-btn').addEventListener('click',()=>{vaText=DEMO_VA;preText=DEMO_PRE;tryProcess();});
+</script>
