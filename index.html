@@ -148,13 +148,13 @@
     <div class="u-logo">NETFLIX</div>
     <div class="u-title">Your Year,<br><span>Wrapped.</span></div>
     <div class="u-sub">Upload your <strong style="color:#ccc">CONTENT_INTERACTION</strong> folder from your Netflix data download.</div>
-    <label for="nw-folder-input" class="drop-zone">
+    <label for="nw-folder-input" class="drop-zone" id="drop-zone">
       <div class="drop-icon"><i class="ti ti-folder-upload" aria-hidden="true"></i></div>
       <div class="drop-text"><strong>Drop your CONTENT_INTERACTION folder here</strong><br>or click to select it</div>
       <div class="folder-badge"><i class="ti ti-folder" aria-hidden="true" style="font-size:12px"></i> CONTENT_INTERACTION</div>
       <div class="drop-hint">Netflix → Account → Download your personal information<br>→ Extract ZIP → upload the CONTENT_INTERACTION folder<br><br>Needs: <strong style="color:#555">ViewingActivity.csv</strong> + <strong style="color:#555">PlaybackRelatedEvents.csv</strong></div>
     </label>
-    <input type="file" id="nw-folder-input" webkitdirectory multiple accept=".csv">
+    <input type="file" id="nw-folder-input" multiple accept=".csv">
     <div class="err-box" id="err-box"></div>
     <div class="u-divider">OR</div>
     <button class="u-demo" id="demo-btn">Try with demo data</button>
