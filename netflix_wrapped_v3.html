@@ -97,6 +97,50 @@
   .nav-btn:hover{background:rgba(255,255,255,.13);}
   .nav-btn.pri{background:#E50914;border-color:#E50914;}
   .nav-btn.pri:hover{background:#f40612;}
+
+  .lava-container{
+  position:relative;
+  width:100%;
+  max-width:420px;
+  height:260px;
+  overflow:hidden;
+  border-radius:20px;
+  background:#0A0A0F;
+}
+
+/* BLOBS */
+.lava-blob{
+  position:absolute;
+  width:220px;
+  height:220px;
+  border-radius:50%;
+
+  opacity:0.65;
+
+  filter: blur(40px);
+  mix-blend-mode: screen;
+
+  animation: lavaMove linear infinite;
+}
+
+/* Movement */
+@keyframes lavaMove{
+  0%{
+    transform: translate(0px, 0px) scale(1);
+  }
+  25%{
+    transform: translate(40px, -30px) scale(1.2);
+  }
+  50%{
+    transform: translate(-30px, 50px) scale(0.9);
+  }
+  75%{
+    transform: translate(50px, 20px) scale(1.3);
+  }
+  100%{
+    transform: translate(0px, 0px) scale(1);
+  }
+}
 </style>
 
 <div id="nw">
@@ -319,13 +363,18 @@ function parseDur(s){
   return 0;
 }
 
-function isShow(title){
-  const parts=title.split(':').map(s=>s.trim());
-  const hasSeason=/season\s*\d+/i.test(title);
-  const hasEp=/episode\s*\d+|\(ep|\bep\s*\d+/i.test(title);
-  const hasChap=/chapter\s*\d+/i.test(title);
-  const hasMoment=/\bclip\b|\bmoment\b|\btrailer\b|\bteaser\b|\brecap\b/i.test(title);
-  return (parts.length>=3&&!hasMoment)||hasSeason||hasEp||hasChap;
+function extractShowSeason(title){
+  const parts = title.split(':').map(s => s.trim());
+
+  // Example:
+  // "The Rookie: Season 5: Episode 2"
+  // → ["The Rookie", "Season 5", "Episode 2"]
+
+  if(parts.length >= 2 && /season/i.test(parts[1])){
+    return parts[0] + ' - ' + parts[1]; // "The Rookie - Season 5"
+  }
+
+  return parts[0]; // fallback
 }
 
 function extractShow(title){return title.split(':')[0].trim();}
@@ -370,6 +419,16 @@ function parseReplayMoment(playtracesStr){
   }catch(e){}
   return null;
 }
+  function getGenreColors(genres){
+  const colors = {};
+
+  genres.forEach(g => {
+    const hue = Math.floor(Math.random() * 360);
+    colors[g] = `hsl(${hue}, 70%, 55%)`;
+  });
+
+  return colors;
+}
 
 /* Infer genres from title keywords when not in DB */
 function inferGenres(title){
@@ -408,7 +467,7 @@ function analyze(vaText,preText){
     if(dev)deviceCount[dev]=(deviceCount[dev]||0)+1;
 
     if(isShow(title)){
-      const show=extractShow(title);
+      const show=extractShowSeason(title);
       showMins[show]=(showMins[show]||0)+dur;
       showCount[show]=(showCount[show]||0)+1;
       if(month){if(!monthMap[month])monthMap[month]={};monthMap[month][show]=(monthMap[month][show]||0)+1;}
@@ -429,7 +488,7 @@ function analyze(vaText,preText){
     const genres=GENRE_DB[title]||inferGenres(title);
     genres.forEach(g=>{genreTally[g]=(genreTally[g]||0)+mins;});
   });
-  const topGenres=Object.entries(genreTally).sort((a,b)=>b[1]-a[1]).slice(0,8);
+  const topGenres=Object.entries(genreTally).sort((a,b)=>b[1]-a[1]).slice(0,5);
 
   /* Avg rating age */
   const ratingAges=Object.keys(showMins).concat(Object.keys(movieMins)).map(s=>RATING_DB[s]).filter(x=>x!=null);
@@ -538,11 +597,58 @@ function render(d){
   }else{mb.style.display='none';}
   setText('rw-pct',Math.min(92,Math.max(22,28+rwCount*7))+'%');
 
-  const cm=document.getElementById('cmap');cm.innerHTML='';
-  const gl=d.topGenres.map(([g])=>g);
-  for(let i=0;i<15;i++){
-    cm.innerHTML+=`<div class="cmap-cell" style="background:${cmapColors[i%cmapColors.length]};"><span class="cmap-label">${gl[i%gl.length]||''}</span></div>`;
-  }
+  const cm = document.getElementById('cmap');
+cm.innerHTML = `<div class="lava-container" id="lava"></div>`;
+
+const genres = d.topGenres.map(([g]) => g);
+const colors = getGenreColors(genres);
+
+const lava = document.getElementById('lava');
+
+// create one blob per genre
+genres.forEach((g, i) => {
+  const blob = document.createElement('div');
+  blob.className = 'lava-blob';
+
+  blob.style.background = colors[g];
+
+  // random positions + animation timing
+  blob.style.left = Math.random() * 80 + '%';
+  blob.style.top = Math.random() * 80 + '%';
+  blob.style.animationDuration = (20 + Math.random() * 20) + 's';
+  blob.style.animationDelay = (Math.random() * 10) + 's';
+
+  lava.appendChild(blob);
+});
+  const cm = document.getElementById('cmap');
+cm.innerHTML = '';
+
+const genres = d.topGenres.map(([g]) => g);
+const colorMap = getGenreColors(genres);
+
+// Create a soft "blob" distribution
+for(let i = 0; i < 15; i++){
+  const g = genres[Math.floor(Math.random() * genres.length)];
+
+  const baseColor = colorMap[g];
+
+  // Slight variation for gradient feel
+  const variation = Math.random() * 20 - 10; // -10 to +10
+
+  const color = baseColor.replace(
+    /(\d+)%\)$/,
+    (match, light) => `${Math.max(40, Math.min(70, +light + variation))}%)`
+  );
+
+  cm.innerHTML += `
+    <div class="cmap-cell"
+         style="
+           background:${color};
+           filter: blur(${Math.random() * 2}px);
+         ">
+    </div>
+  `;
+}
   setText('palette-desc',`${d.topGenres.length} genres. One very specific taste.`);
 
   const ml=document.getElementById('month-list');ml.innerHTML='';
